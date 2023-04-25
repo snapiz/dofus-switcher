@@ -124,6 +124,22 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
             xdotool click 1
         done
         ;;
+    110)
+        wmctrl -a ${names[0]} - Dofus
+        sleep 0.15
+        xdotool key space
+        sleep 0.15
+        for i in "${!names[@]}"; do
+            if [ "$i" -eq 0 ]; then
+                continue
+            fi
+            xdotool type "/invite ${names[$i]}"
+            sleep 0.15
+            xdotool key Return
+            sleep 0.20
+        done
+        wmctrl -a ${names[1]} - Dofus
+        ;;
     112)
         data=$(wmctrl -l)
         readarray -t windows <<<"$data"
