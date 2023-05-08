@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for PID in `ps -ef| awk '/dofus-switcher\/switcher.sh/ {print $2}'`; do
+for PID in `ps -ef| awk '/dofus\/switcher.sh/ {print $2}'`; do
     if [[ $PID != $$ ]]; then
         kill -9 $PID
     fi
@@ -8,7 +8,7 @@ done
 
 keys_press=()
 default_names=(
-    Eni-doco Bilicow
+    Zozo Zaza
 )
 
 
@@ -74,6 +74,7 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
             if [[ "${names[$i]}" != "${current}" ]]; then
                 continue
             fi
+            echo "${names[$i]} ${current}"
 
             next=$((i + 1))
 
@@ -128,13 +129,13 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
         wmctrl -a ${names[0]} - Dofus
         sleep 0.15
         xdotool key space
-        sleep 0.15
         for i in "${!names[@]}"; do
             if [ "$i" -eq 0 ]; then
                 continue
             fi
-            xdotool type "/invite ${names[$i]}"
-            sleep 0.15
+            echo "/invite ${names[$i]}" | xclip -selection clipboard
+            xdotool key ctrl+v
+            sleep 0.20
             xdotool key Return
             sleep 0.20
         done
