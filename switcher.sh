@@ -8,7 +8,11 @@ done
 
 keys_press=()
 default_names=(
-    Zozo Zaza
+    # Zidha Papiden
+    Mwa-portail Mwa-feka
+    Mwa-ivoire Mwa-vita Mwa-intel Mwa-sage Mwa-force Mwa-amande
+    Mwa-boub Mwa-colere Mwa-pm Mwa-shot Celuss Mwa-infect
+    Mwa-agi
 )
 
 
@@ -128,16 +132,15 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
     110)
         wmctrl -a ${names[0]} - Dofus
         sleep 0.15
-        xdotool key space
+        xdotool sleep 0.100 key --clearmodifiers space
+        sleep 0.3
         for i in "${!names[@]}"; do
             if [ "$i" -eq 0 ]; then
                 continue
             fi
             echo "/invite ${names[$i]}" | xclip -selection clipboard
-            xdotool key ctrl+v
-            sleep 0.20
-            xdotool key Return
-            sleep 0.20
+            xdotool sleep 0.100 key --delay 0 --clearmodifiers Control_L+v Return
+            sleep 0.3
         done
         wmctrl -a ${names[1]} - Dofus
         ;;
