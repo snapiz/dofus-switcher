@@ -8,11 +8,7 @@ done
 
 keys_press=()
 default_names=(
-    # Zidha Papiden
-    Mwa-portail Mwa-feka
-    Mwa-ivoire Mwa-vita Mwa-intel Mwa-sage Mwa-force Mwa-amande
-    Mwa-boub Mwa-colere Mwa-pm Mwa-shot Celuss Mwa-infect
-    Mwa-agi
+    # Bibi baba
 )
 
 
