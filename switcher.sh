@@ -129,14 +129,14 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
         wmctrl -a ${names[0]} - Dofus
         sleep 0.15
         xdotool sleep 0.100 key --clearmodifiers space
-        sleep 0.3
+        sleep 0.30
         for i in "${!names[@]}"; do
             if [ "$i" -eq 0 ]; then
                 continue
             fi
             echo "/invite ${names[$i]}" | xclip -selection clipboard
-            xdotool sleep 0.100 key --delay 0 --clearmodifiers Control_L+v Return
-            sleep 0.3
+            xdotool sleep 0.100 key --delay 30 --clearmodifiers Control_L+v Return
+            sleep 0.30
         done
         wmctrl -a ${names[1]} - Dofus
         ;;
