@@ -135,7 +135,7 @@ xinput test-xi2 --root 3 | grep -A2 --line-buffered RawKey | while read -r line;
                 continue
             fi
             echo "/invite ${names[$i]}" | xclip -selection clipboard
-            xdotool sleep 0.100 key --delay 30 --clearmodifiers Control_L+v Return
+            xdotool sleep 0.100 key --delay 40 --clearmodifiers Control_L+v Return
             sleep 0.30
         done
         wmctrl -a ${names[1]} - Dofus
