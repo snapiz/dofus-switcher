@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for PID in `ps -ef| awk '/dofus\/switcher.sh/ {print $2}'`; do
+for PID in `ps -ef| awk '/dofus-switcher\/switcher.sh/ {print $2}'`; do
     if [[ $PID != $$ ]]; then
         kill -9 $PID
     fi
