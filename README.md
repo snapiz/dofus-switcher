@@ -4,3 +4,4 @@
 * xprop
 * xdotool
 * wmctrl
+* xclip
