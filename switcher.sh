@@ -8,7 +8,7 @@ done
 
 keys_press=()
 default_names=(
-    # Bibi baba
+    # Mvp-elio Mvp-panda
 )
 
 
