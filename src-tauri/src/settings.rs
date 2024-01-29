@@ -46,7 +46,7 @@ pub struct Settings {
 static SETTINGS_PATH: &'static str = "../target/DofusSwitcher.toml";
 
 #[cfg(not(debug_assertions))] // n'incluez ce code que sur les versions de débogage
-static settings_path: &'static str = "/etc/dofus-switcher/Config.toml";
+static SETTINGS_PATH: &'static str = "/etc/dofus-switcher/Config.toml";
 
 impl Settings {
     pub fn new() -> Self {
