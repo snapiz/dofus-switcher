@@ -1,0 +1,17 @@
+{
+  "name": "dofus-switcher",
+  "version": "1.0.0",
+  "description": "## Required * xprop * xdotool * wmctrl * xclip",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
+    "daisyui": "^4.6.0",
+    "tailwindcss": "^3.4.1"
+  }
+}
