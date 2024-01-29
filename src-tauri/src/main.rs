@@ -55,7 +55,7 @@ fn callback(event: Event) {
 
     let wins = get_windows().read().unwrap();
 
-    // traval
+    // travel
     if let EventType::KeyPress(Key::PageUp) = event.event_type {}
 
     // ?
