@@ -3,7 +3,7 @@ use leptos::*;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
-use web_sys::{FormData, HtmlDialogElement, HtmlFormElement};
+use web_sys::{DragEvent, FormData, HtmlDialogElement, HtmlFormElement};
 
 #[wasm_bindgen]
 extern "C" {
@@ -25,6 +25,13 @@ struct GroupIdArgs {
 struct DeleteGroupCharacterArgs {
     group: usize,
     character: usize,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SwapGroupCharacterArgs {
+    group: usize,
+    a: usize,
+    b: usize,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -212,7 +219,48 @@ pub fn App() -> impl IntoView {
                     </div>
                     <div class="flex flex-wrap">
                         {group.characters.iter().enumerate().map(|(c_id, character)| view! {
-                            <div draggable="true">
+                            <div draggable="true" on:dragstart=move |ev: DragEvent| {
+                                let Some(data) = ev.data_transfer() else {
+                                    return;
+                                };
+
+                                let _ = data.set_data("application/switcher-character", c_id.to_string().as_str());
+                                data.set_effect_allowed("move");
+                            }
+                            on:dragover=move |ev| {
+                                ev.prevent_default();
+
+                                let Some(data) = ev.data_transfer() else {
+                                    return;
+                                };
+
+                                data.set_drop_effect("move");
+                            }
+                            on:drop=move |ev| {
+                                ev.prevent_default();
+
+                                let Some(data) = ev.data_transfer() else {
+                                    return;
+                                };
+
+                                let Ok(value) = data.get_data("application/switcher-character") else {
+                                    return;
+                                };
+
+                                let Ok(from_id) = value.parse::<usize>() else {
+                                    return;
+                                };
+
+                                spawn_local(async move {
+                                    let args = to_value(&SwapGroupCharacterArgs { group: i, a: c_id, b: from_id }).expect("args to be JsValue");
+                                    let resp = invoke("swap_group_character", args).await;
+                                    let Ok(resp) = from_value::<Settings>(resp) else {
+                                        return;
+                                    };
+
+                                    settings.set(resp);
+                                });
+                            }>
                                 <div class="flex items-center">
                                     <button class="btn btn-sm btn-ghost btn-circle" title="Delete group" on:click=move |_| {
                                         spawn_local(async move {

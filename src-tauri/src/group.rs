@@ -146,3 +146,18 @@ pub fn delete_group_character(group: usize, character: usize) -> Settings {
 
     settings
 }
+
+#[tauri::command]
+pub fn swap_group_character(group: usize, a: usize, b: usize) -> Settings {
+    let settings = {
+        let mut settings = get_settings().write().unwrap();
+
+        settings.groups[group].characters.swap(a, b);
+        settings.save();
+        settings.clone()
+    };
+
+    update_windows(&settings);
+
+    settings
+}

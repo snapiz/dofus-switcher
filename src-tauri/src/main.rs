@@ -236,7 +236,8 @@ fn main() {
             group::set_current_group,
             group::delete_group,
             group::refresh_group,
-            group::delete_group_character
+            group::delete_group_character,
+            group::swap_group_character
         ])
         .system_tray(system_tray)
         .on_system_tray_event(|app, event| match event {
