@@ -12,7 +12,6 @@ pub enum CommandError {
     #[error(transparent)]
     FromUtf8(#[from] std::string::FromUtf8Error),
 
-
     #[error(transparent)]
     Simulate(#[from] rdev::SimulateError),
 

@@ -10,13 +10,13 @@ use arboard::Clipboard;
 use group::{get_windows, update_windows};
 use rdev::{listen, Button, Event, EventType, Key};
 use settings::get_settings;
-use window::send;
 use std::{
     sync::{OnceLock, RwLock},
     thread,
     time::Duration,
 };
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
+use window::send;
 
 static SHIFT_PRESSED: OnceLock<RwLock<bool>> = OnceLock::new();
 
