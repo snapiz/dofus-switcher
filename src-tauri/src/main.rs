@@ -10,6 +10,7 @@ use arboard::Clipboard;
 use group::{get_windows, update_windows};
 use rdev::{listen, Button, Event, EventType, Key};
 use settings::get_settings;
+use window::send;
 use std::{
     sync::{OnceLock, RwLock},
     thread,
@@ -23,21 +24,7 @@ pub fn is_shift_pressed() -> &'static RwLock<bool> {
     SHIFT_PRESSED.get_or_init(|| false.into())
 }
 
-fn send(event_type: &EventType) {
-    let delay = std::time::Duration::from_millis(20);
-    match rdev::simulate(event_type) {
-        Ok(()) => (),
-        Err(_) => {
-            println!("We could not send {:?}", event_type);
-        }
-    }
-    // Let ths OS catchup (at least MacOS)
-    thread::sleep(delay);
-}
-
 fn pre_typing() {
-    send(&EventType::ButtonPress(Button::Right));
-    send(&EventType::ButtonRelease(Button::Right));
     send(&EventType::KeyPress(Key::Space));
     send(&EventType::KeyRelease(Key::Space));
     send(&EventType::KeyPress(Key::ControlLeft));
@@ -70,10 +57,10 @@ fn callback(event: Event) {
         };
 
         let _ = window::focus(leader);
+        pre_typing();
 
         for (name, _) in wins.iter().skip(1) {
             thread::sleep(Duration::from_millis(150));
-            pre_typing();
 
             let mut clipboard = Clipboard::new().unwrap();
             clipboard.set_text(format!("/invite {name}")).unwrap();
@@ -92,7 +79,6 @@ fn callback(event: Event) {
     if let EventType::KeyPress(Key::F9) = event.event_type {
         for (_, win) in wins.iter() {
             let _ = window::focus(win);
-            thread::sleep(Duration::from_millis(100));
             send(&EventType::ButtonPress(Button::Right));
             send(&EventType::ButtonRelease(Button::Right));
         }
@@ -102,7 +88,6 @@ fn callback(event: Event) {
     if let EventType::KeyPress(Key::F10) = event.event_type {
         for (_, win) in wins.iter() {
             let _ = window::focus(win);
-            thread::sleep(Duration::from_millis(100));
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
             send(&EventType::ButtonPress(Button::Left));
@@ -114,7 +99,6 @@ fn callback(event: Event) {
     if let EventType::KeyPress(Key::F11) = event.event_type {
         for (_, win) in wins.iter().skip(1) {
             let _ = window::focus(win);
-            thread::sleep(Duration::from_millis(100));
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
         }
@@ -124,7 +108,6 @@ fn callback(event: Event) {
     if let EventType::KeyPress(Key::BackQuote) = event.event_type {
         for (_, win) in wins.iter() {
             let _ = window::focus(win);
-            thread::sleep(Duration::from_millis(100));
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
         }

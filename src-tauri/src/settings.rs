@@ -45,10 +45,6 @@ pub struct Settings {
     pub current_group: usize,
 }
 
-#[cfg(debug_assertions)] // n'incluez ce code que sur les versions de débogage
-static SETTINGS_PATH: &'static str = "~/.config/dofus-switcher/Config.toml";
-
-#[cfg(not(debug_assertions))] // n'incluez ce code que sur les versions de débogage
 static SETTINGS_PATH: &'static str = "~/.config/dofus-switcher/Config.toml";
 
 fn get_settings_path() -> String {

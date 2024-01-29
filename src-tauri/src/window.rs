@@ -1,6 +1,7 @@
-use std::{collections::HashMap, sync::OnceLock};
-
 use anyhow::anyhow;
+use enigo::{Enigo, MouseControllable};
+use rdev::{Button, EventType};
+use std::{collections::HashMap, sync::OnceLock, thread};
 use x11rb::{
     atom_manager,
     connection::Connection,
@@ -133,8 +134,9 @@ pub fn get_visible_windows() -> CommandResult<HashMap<String, u32>> {
 pub fn focus(id: &u32) -> CommandResult<()> {
     let (conn, _, _) = get_conn_info();
 
-    conn.set_input_focus(InputFocus::NONE, id.to_owned(), CURRENT_TIME)
-        .unwrap();
+    conn.set_input_focus(InputFocus::POINTER_ROOT, id.to_owned(), CURRENT_TIME)
+        .unwrap()
+        .check()?;
 
     conn.configure_window(
         id.to_owned(),
@@ -142,5 +144,33 @@ pub fn focus(id: &u32) -> CommandResult<()> {
     )?
     .check()?;
 
+    std::thread::sleep(std::time::Duration::from_millis(100));
+
+    let mut enigo = Enigo::new();
+    let (x, y) = enigo.mouse_location();
+    let attr = conn.get_geometry(id.to_owned())?.reply()?;
+
+    enigo.mouse_move_to(
+        (attr.x as u16 + (attr.width as f32 * 0.435).floor() as u16).into(),
+        (attr.y as u16 + (attr.height as f32 * 0.98).floor() as u16).into(),
+    );
+
+    send(&EventType::ButtonPress(Button::Left));
+    send(&EventType::ButtonRelease(Button::Left));
+
+    enigo.mouse_move_to(x, y);
+
     Ok(())
+}
+
+pub fn send(event_type: &EventType) {
+    let delay = std::time::Duration::from_millis(20);
+    match rdev::simulate(event_type) {
+        Ok(()) => (),
+        Err(_) => {
+            println!("We could not send {:?}", event_type);
+        }
+    }
+    // Let ths OS catchup (at least MacOS)
+    thread::sleep(delay);
 }
