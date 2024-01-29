@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::sync::{OnceLock, RwLock};
+use std::{
+    path::Path,
+    sync::{OnceLock, RwLock},
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Breed {
@@ -43,25 +46,39 @@ pub struct Settings {
 }
 
 #[cfg(debug_assertions)] // n'incluez ce code que sur les versions de débogage
-static SETTINGS_PATH: &'static str = "../target/DofusSwitcher.toml";
+static SETTINGS_PATH: &'static str = "~/.config/dofus-switcher/Config.toml";
 
 #[cfg(not(debug_assertions))] // n'incluez ce code que sur les versions de débogage
-static SETTINGS_PATH: &'static str = "/etc/dofus-switcher/Config.toml";
+static SETTINGS_PATH: &'static str = "~/.config/dofus-switcher/Config.toml";
+
+fn get_settings_path() -> String {
+    shellexpand::tilde(SETTINGS_PATH).to_string()
+}
 
 impl Settings {
     pub fn new() -> Self {
-        match std::fs::read_to_string(SETTINGS_PATH) {
+        let path = get_settings_path();
+
+        match std::fs::read_to_string(path) {
             Ok(content) => toml::from_str(content.as_str()).expect("content to be toml"),
             Err(_) => Default::default(),
         }
     }
 
     pub fn save(&self) {
+        let path = get_settings_path();
+
+        let Some(dir) = Path::new(path.as_str()).parent() else {
+            return;
+        };
+
+        if let Err(_) = std::fs::create_dir_all(dir) {
+            return;
+        }
+
         toml::to_string(self)
             .map_err(|e| e.to_string())
-            .and_then(|content| {
-                std::fs::write(SETTINGS_PATH, content).map_err(|e| e.to_string())
-            })
+            .and_then(|content| std::fs::write(path, content).map_err(|e| e.to_string()))
             .expect("settings to be saved at DofusSwitcher.toml")
     }
 }
