@@ -56,7 +56,7 @@ fn callback(event: Event) {
             return;
         };
 
-        let _ = window::focus(leader);
+        let _ = window::focus(leader, true);
         pre_typing();
 
         for (name, _) in wins.iter().skip(1) {
@@ -78,7 +78,7 @@ fn callback(event: Event) {
     // right click with all
     if let EventType::KeyPress(Key::F9) = event.event_type {
         for (_, win) in wins.iter() {
-            let _ = window::focus(win);
+            let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Right));
             send(&EventType::ButtonRelease(Button::Right));
         }
@@ -87,7 +87,7 @@ fn callback(event: Event) {
     // double left click all
     if let EventType::KeyPress(Key::F10) = event.event_type {
         for (_, win) in wins.iter() {
-            let _ = window::focus(win);
+            let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
             send(&EventType::ButtonPress(Button::Left));
@@ -98,7 +98,7 @@ fn callback(event: Event) {
     // left click all without leader
     if let EventType::KeyPress(Key::F11) = event.event_type {
         for (_, win) in wins.iter().skip(1) {
-            let _ = window::focus(win);
+            let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
         }
@@ -107,7 +107,7 @@ fn callback(event: Event) {
     // left click all
     if let EventType::KeyPress(Key::BackQuote) = event.event_type {
         for (_, win) in wins.iter() {
-            let _ = window::focus(win);
+            let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
         }
@@ -146,48 +146,48 @@ fn callback(event: Event) {
         };
 
         if let Some((_, win)) = wins.get(i) {
-            let _ = window::focus(win);
+            let _ = window::focus(win, true);
         }
     }
 
     // Select window 1
     if let (EventType::KeyPress(Key::F1), Some((_, win))) = (event.event_type, wins.get(0)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 2
     if let (EventType::KeyPress(Key::F2), Some((_, win))) = (event.event_type, wins.get(1)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 3
     if let (EventType::KeyPress(Key::F3), Some((_, win))) = (event.event_type, wins.get(2)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 4
     if let (EventType::KeyPress(Key::F4), Some((_, win))) = (event.event_type, wins.get(3)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 5
     if let (EventType::KeyPress(Key::F5), Some((_, win))) = (event.event_type, wins.get(4)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 6
     if let (EventType::KeyPress(Key::F6), Some((_, win))) = (event.event_type, wins.get(5)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 7
     if let (EventType::KeyPress(Key::F7), Some((_, win))) = (event.event_type, wins.get(6)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 
     // Select window 8
     if let (EventType::KeyPress(Key::F8), Some((_, win))) = (event.event_type, wins.get(6)) {
-        let _ = window::focus(win);
+        let _ = window::focus(win, true);
     }
 }
 

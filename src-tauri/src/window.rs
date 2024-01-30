@@ -131,7 +131,7 @@ pub fn get_visible_windows() -> CommandResult<HashMap<String, u32>> {
     Ok(visible_windows)
 }
 
-pub fn focus(id: &u32) -> CommandResult<()> {
+pub fn focus(id: &u32, pre_click: bool) -> CommandResult<()> {
     let (conn, _, _) = get_conn_info();
 
     conn.set_input_focus(InputFocus::POINTER_ROOT, id.to_owned(), CURRENT_TIME)
@@ -145,6 +145,10 @@ pub fn focus(id: &u32) -> CommandResult<()> {
     .check()?;
 
     std::thread::sleep(std::time::Duration::from_millis(100));
+
+    if !pre_click {
+        return Ok(());
+    }
 
     let mut enigo = Enigo::new();
     let (x, y) = enigo.mouse_location();
