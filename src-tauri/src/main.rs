@@ -64,12 +64,15 @@ fn callback(event: Event) {
 
             let mut clipboard = Clipboard::new().unwrap();
             clipboard.set_text(format!("/invite {name}")).unwrap();
-            thread::sleep(Duration::from_millis(20));
+            thread::sleep(Duration::from_millis(100));
 
             send(&EventType::KeyPress(Key::ControlLeft));
             send(&EventType::KeyPress(Key::KeyV));
             send(&EventType::KeyRelease(Key::ControlLeft));
             send(&EventType::KeyRelease(Key::KeyV));
+
+            thread::sleep(Duration::from_millis(20));
+
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
         }
