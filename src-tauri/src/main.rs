@@ -25,19 +25,19 @@ pub fn is_shift_pressed() -> &'static RwLock<bool> {
 }
 
 fn pre_typing() {
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(50));
 
     send(&EventType::KeyPress(Key::Space));
     send(&EventType::KeyRelease(Key::Space));
     send(&EventType::KeyPress(Key::ControlLeft));
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(Duration::from_millis(25));
 
     send(&EventType::KeyPress(Key::KeyA));
     send(&EventType::KeyRelease(Key::ControlLeft));
     send(&EventType::KeyRelease(Key::KeyA));
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(Duration::from_millis(25));
 
     send(&EventType::KeyPress(Key::Delete));
     send(&EventType::KeyRelease(Key::Delete));
