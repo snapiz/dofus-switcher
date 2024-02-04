@@ -28,6 +28,9 @@ fn pre_typing() {
     send(&EventType::KeyPress(Key::Space));
     send(&EventType::KeyRelease(Key::Space));
     send(&EventType::KeyPress(Key::ControlLeft));
+
+    thread::sleep(Duration::from_millis(20));
+
     send(&EventType::KeyPress(Key::KeyA));
     send(&EventType::KeyRelease(Key::ControlLeft));
     send(&EventType::KeyRelease(Key::KeyA));
