@@ -43,12 +43,41 @@ fn callback(event: Event) {
     let wins = get_windows().read().unwrap();
 
     // travel
-    if let EventType::KeyPress(Key::PageUp) = event.event_type {}
+    if let EventType::KeyPress(Key::PageUp) = event.event_type {
+        let Some((_, leader)) = wins.first() else {
+            return;
+        };
 
-    // ?
-    // if let EventType::KeyPress(Key::PageDown) = event.event_type {
+        for (_, win) in wins.iter() {
+            if &active_window != leader {
+                let _ = window::focus(win, true);
+            }
 
-    // }
+            thread::sleep(Duration::from_millis(150));
+
+            pre_typing();
+
+            thread::sleep(Duration::from_millis(100));
+
+            send(&EventType::KeyPress(Key::ControlLeft));
+
+            thread::sleep(Duration::from_millis(20));
+
+            send(&EventType::KeyPress(Key::KeyV));
+            send(&EventType::KeyRelease(Key::ControlLeft));
+            send(&EventType::KeyRelease(Key::KeyV));
+
+            thread::sleep(Duration::from_millis(20));
+
+            send(&EventType::KeyPress(Key::Return));
+            send(&EventType::KeyRelease(Key::Return));
+
+            thread::sleep(Duration::from_millis(200));
+
+            send(&EventType::KeyPress(Key::Return));
+            send(&EventType::KeyRelease(Key::Return));
+        }
+    }
 
     // invite to group
     if let EventType::KeyPress(Key::Home) = event.event_type {
@@ -56,7 +85,10 @@ fn callback(event: Event) {
             return;
         };
 
-        let _ = window::focus(leader, true);
+        if &active_window != leader {
+            let _ = window::focus(leader, true);
+        }
+
         pre_typing();
 
         for (name, _) in wins.iter().skip(1) {
@@ -67,6 +99,9 @@ fn callback(event: Event) {
             thread::sleep(Duration::from_millis(100));
 
             send(&EventType::KeyPress(Key::ControlLeft));
+
+            thread::sleep(Duration::from_millis(20));
+
             send(&EventType::KeyPress(Key::KeyV));
             send(&EventType::KeyRelease(Key::ControlLeft));
             send(&EventType::KeyRelease(Key::KeyV));
@@ -79,7 +114,7 @@ fn callback(event: Event) {
     }
 
     // right click with all
-    if let EventType::KeyPress(Key::F9) = event.event_type {
+    if let EventType::KeyPress(Key::End) = event.event_type {
         for (_, win) in wins.iter() {
             let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Right));
@@ -88,20 +123,11 @@ fn callback(event: Event) {
     }
 
     // double left click all
-    if let EventType::KeyPress(Key::F10) = event.event_type {
+    if let EventType::KeyPress(Key::PageDown) = event.event_type {
         for (_, win) in wins.iter() {
             let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
-            send(&EventType::ButtonPress(Button::Left));
-            send(&EventType::ButtonRelease(Button::Left));
-        }
-    }
-
-    // left click all without leader
-    if let EventType::KeyPress(Key::F11) = event.event_type {
-        for (_, win) in wins.iter().skip(1) {
-            let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
         }
@@ -109,7 +135,10 @@ fn callback(event: Event) {
 
     // left click all
     if let EventType::KeyPress(Key::BackQuote) = event.event_type {
-        for (_, win) in wins.iter() {
+        let shift_pressed = is_shift_pressed().read().unwrap();
+        let skin_n = if shift_pressed.to_owned() { 1 } else { 0 };
+
+        for (_, win) in wins.iter().skip(skin_n) {
             let _ = window::focus(win, false);
             send(&EventType::ButtonPress(Button::Left));
             send(&EventType::ButtonRelease(Button::Left));
@@ -117,13 +146,13 @@ fn callback(event: Event) {
     }
 
     if let EventType::KeyPress(Key::ShiftLeft) = event.event_type {
-        let mut b = is_shift_pressed().write().unwrap();
-        *b = true;
+        let mut shift_pressed = is_shift_pressed().write().unwrap();
+        *shift_pressed = true;
     }
 
     if let EventType::KeyRelease(Key::ShiftLeft) = event.event_type {
-        let mut b = is_shift_pressed().write().unwrap();
-        *b = false;
+        let mut shift_pressed = is_shift_pressed().write().unwrap();
+        *shift_pressed = false;
     }
 
     // Go to next or previous
@@ -132,9 +161,9 @@ fn callback(event: Event) {
             return;
         };
 
-        let b = is_shift_pressed().read().unwrap();
+        let shift_pressed = is_shift_pressed().read().unwrap();
 
-        let i = if b.to_owned() {
+        let i = if shift_pressed.to_owned() {
             if pos == 0 {
                 wins.len() - 1
             } else {
