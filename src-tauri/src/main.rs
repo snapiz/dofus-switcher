@@ -52,14 +52,8 @@ fn callback(event: Event) {
 
     // travel
     if let EventType::KeyPress(Key::PageUp) = event.event_type {
-        let Some((_, leader)) = wins.first() else {
-            return;
-        };
-
         for (_, win) in wins.iter() {
-            if &active_window != leader {
-                let _ = window::focus(win, true);
-            }
+            let _ = window::focus(win, true);
 
             thread::sleep(Duration::from_millis(150));
 
