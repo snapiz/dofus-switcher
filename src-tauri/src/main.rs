@@ -55,11 +55,11 @@ fn callback(event: Event) {
         for (_, win) in wins.iter() {
             let _ = window::focus(win, true);
 
-            thread::sleep(Duration::from_millis(150));
+            // thread::sleep(Duration::from_millis(150));
 
             pre_typing();
 
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(20));
 
             send(&EventType::KeyPress(Key::ControlLeft));
 
@@ -74,7 +74,7 @@ fn callback(event: Event) {
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
 
-            thread::sleep(Duration::from_millis(200));
+            thread::sleep(Duration::from_millis(120));
 
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
