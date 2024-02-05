@@ -74,7 +74,7 @@ fn callback(event: Event) {
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
 
-            thread::sleep(Duration::from_millis(120));
+            thread::sleep(Duration::from_millis(150));
 
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
