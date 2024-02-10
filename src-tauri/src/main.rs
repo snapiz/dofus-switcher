@@ -7,6 +7,8 @@ mod settings;
 mod window;
 
 use arboard::Clipboard;
+use enigo::{Enigo, MouseControllable};
+use error::CommandResult;
 use group::{get_windows, update_windows};
 use rdev::{listen, Button, Event, EventType, Key};
 use settings::get_settings;
@@ -16,7 +18,8 @@ use std::{
     time::Duration,
 };
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
-use window::send;
+use window::{get_conn_info, send};
+use x11rb::protocol::xproto::ConnectionExt;
 
 static SHIFT_PRESSED: OnceLock<RwLock<bool>> = OnceLock::new();
 
@@ -24,23 +27,23 @@ pub fn is_shift_pressed() -> &'static RwLock<bool> {
     SHIFT_PRESSED.get_or_init(|| false.into())
 }
 
-fn pre_typing() {
-    thread::sleep(Duration::from_millis(50));
+fn pre_typing(win: u32) -> CommandResult<()> {
+    let (conn, _, _) = get_conn_info();
+    let mut enigo = Enigo::new();
+    let (x, y) = enigo.mouse_location();
+    let attr = conn.get_geometry(win)?.reply()?;
 
-    send(&EventType::KeyPress(Key::Space));
-    send(&EventType::KeyRelease(Key::Space));
-    send(&EventType::KeyPress(Key::ControlLeft));
+    enigo.mouse_move_to(
+        (attr.x as u16 + (attr.width as f32 * 0.235).floor() as u16).into(),
+        (attr.y as u16 + (attr.height as f32 * 1.018).floor() as u16).into(),
+    );
 
-    thread::sleep(Duration::from_millis(25));
+    send(&EventType::ButtonPress(Button::Left));
+    send(&EventType::ButtonRelease(Button::Left));
 
-    send(&EventType::KeyPress(Key::KeyA));
-    send(&EventType::KeyRelease(Key::ControlLeft));
-    send(&EventType::KeyRelease(Key::KeyA));
+    enigo.mouse_move_to(x, y);
 
-    thread::sleep(Duration::from_millis(25));
-
-    send(&EventType::KeyPress(Key::Delete));
-    send(&EventType::KeyRelease(Key::Delete));
+    Ok(())
 }
 
 fn callback(event: Event) {
@@ -55,9 +58,7 @@ fn callback(event: Event) {
         for (_, win) in wins.iter() {
             let _ = window::focus(win, true);
 
-            // thread::sleep(Duration::from_millis(150));
-
-            pre_typing();
+            let _ = pre_typing(win.to_owned());
 
             thread::sleep(Duration::from_millis(20));
 
@@ -91,7 +92,7 @@ fn callback(event: Event) {
             let _ = window::focus(leader, true);
         }
 
-        pre_typing();
+        let _ = pre_typing(leader.to_owned());
 
         for (name, _) in wins.iter().skip(1) {
             thread::sleep(Duration::from_millis(150));
