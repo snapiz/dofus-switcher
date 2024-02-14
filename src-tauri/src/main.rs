@@ -67,15 +67,16 @@ fn callback(event: Event) {
             thread::sleep(Duration::from_millis(20));
 
             send(&EventType::KeyPress(Key::KeyV));
-            send(&EventType::KeyRelease(Key::ControlLeft));
             send(&EventType::KeyRelease(Key::KeyV));
 
             thread::sleep(Duration::from_millis(20));
 
+            send(&EventType::KeyRelease(Key::ControlLeft));
+
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
 
-            thread::sleep(Duration::from_millis(150));
+            thread::sleep(Duration::from_millis(100));
 
             send(&EventType::KeyPress(Key::Return));
             send(&EventType::KeyRelease(Key::Return));
@@ -221,7 +222,7 @@ fn callback(event: Event) {
     }
 
     // Select window 8
-    if let (EventType::KeyPress(Key::F8), Some((_, win))) = (event.event_type, wins.get(6)) {
+    if let (EventType::KeyPress(Key::F8), Some((_, win))) = (event.event_type, wins.get(7)) {
         let _ = window::focus(win, true);
     }
 }
