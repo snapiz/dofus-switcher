@@ -14,7 +14,7 @@ use rdev::{listen, Button, Event, EventType, Key};
 use settings::get_settings;
 use std::{
     sync::{OnceLock, RwLock},
-    thread,
+    thread::{self, sleep},
     time::Duration,
 };
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
@@ -229,14 +229,18 @@ fn callback(event: Event) {
 
 fn main() {
     thread::spawn(|| listen(callback));
+    thread::spawn(|| loop {
+        {
+            let settings = get_settings().read().unwrap();
+            update_windows(&settings.clone());
+        }
 
-    let refresh = CustomMenuItem::new("refresh".to_string(), "Refresh");
+        sleep(Duration::from_secs(1));
+    });
+
     let show = CustomMenuItem::new("settings".to_string(), "Settings");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(show)
-        .add_item(refresh)
-        .add_item(quit); // insert the menu items here
+    let tray_menu = SystemTrayMenu::new().add_item(show).add_item(quit); // insert the menu items here
     let system_tray = SystemTray::new().with_menu(tray_menu);
 
     tauri::Builder::default()
@@ -262,10 +266,6 @@ fn main() {
         .on_system_tray_event(|app, event| match event {
             SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
                 "quit" => app.exit(0),
-                "refresh" => {
-                    let settings = get_settings().read().unwrap();
-                    update_windows(&settings.clone());
-                }
                 "settings" => {
                     let window = app.get_window("main").expect("failed to get main window");
 
