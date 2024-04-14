@@ -138,7 +138,7 @@ fn callback(event: Event) {
     }
 
     // left click all
-    if let EventType::KeyPress(Key::BackQuote) = event.event_type {
+    if let EventType::KeyPress(Key::Delete) = event.event_type {
         let shift_pressed = is_shift_pressed().read().unwrap();
         let skin_n = if shift_pressed.to_owned() { 1 } else { 0 };
 
@@ -149,12 +149,12 @@ fn callback(event: Event) {
         }
     }
 
-    if let EventType::KeyPress(Key::ShiftLeft) = event.event_type {
+    if let EventType::KeyPress(Key::ControlLeft) = event.event_type {
         let mut shift_pressed = is_shift_pressed().write().unwrap();
         *shift_pressed = true;
     }
 
-    if let EventType::KeyRelease(Key::ShiftLeft) = event.event_type {
+    if let EventType::KeyRelease(Key::ControlLeft) = event.event_type {
         let mut shift_pressed = is_shift_pressed().write().unwrap();
         *shift_pressed = false;
     }
