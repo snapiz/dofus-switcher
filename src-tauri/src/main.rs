@@ -138,7 +138,7 @@ fn callback(event: Event) {
     }
 
     // left click all
-    if let EventType::KeyPress(Key::BackQuote) = event.event_type {
+    if let EventType::KeyPress(Key::Delete) = event.event_type {
         let shift_pressed = is_shift_pressed().read().unwrap();
         let skin_n = if shift_pressed.to_owned() { 1 } else { 0 };
 
