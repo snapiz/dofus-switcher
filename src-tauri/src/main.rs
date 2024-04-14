@@ -149,12 +149,12 @@ fn callback(event: Event) {
         }
     }
 
-    if let EventType::KeyPress(Key::ShiftLeft) = event.event_type {
+    if let EventType::KeyPress(Key::ControlLeft) = event.event_type {
         let mut shift_pressed = is_shift_pressed().write().unwrap();
         *shift_pressed = true;
     }
 
-    if let EventType::KeyRelease(Key::ShiftLeft) = event.event_type {
+    if let EventType::KeyRelease(Key::ControlLeft) = event.event_type {
         let mut shift_pressed = is_shift_pressed().write().unwrap();
         *shift_pressed = false;
     }
