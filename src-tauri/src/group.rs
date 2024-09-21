@@ -111,7 +111,6 @@ pub fn add_character_to_group_at(
         .iter()
         .position(|c| c.name == target_name)
         .map(|index| {
-            println!("{index}");
             if right {
                 db.groups[id].characters.insert(index + 1, character);
             } else {
@@ -121,7 +120,7 @@ pub fn add_character_to_group_at(
             }
         });
 
-    //db.save();
+    db.save();
     db.groups.clone()
 }
 
