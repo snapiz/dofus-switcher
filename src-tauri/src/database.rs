@@ -6,9 +6,9 @@ use std::{
     sync::{OnceLock, RwLock},
 };
 
-static PATH: &'static str = "~/.config/fusdo/data.toml";
+static PATH: &'static str = "~/.config/dofus-switcher/data.toml";
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Breed {
     Ecaflip,
     Eniripsa,
@@ -20,7 +20,7 @@ pub enum Breed {
     Osamodas,
     Enutrof,
     Sram,
-    Xélor,
+    Xelor,
     Pandawa,
     Roublard,
     Zobal,
@@ -31,10 +31,11 @@ pub enum Breed {
     Forgelance,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq)]
 pub struct Character {
     pub name: String,
     pub breed: Option<Breed>,
+    pub enabled: bool,
 }
 
 impl Character {
@@ -42,7 +43,14 @@ impl Character {
         Self {
             name: name.into(),
             breed: None,
+            enabled: true,
         }
+    }
+}
+
+impl PartialEq for Character {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
     }
 }
 
@@ -55,13 +63,13 @@ impl Hash for Character {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Group {
     pub name: String,
-    pub characters: HashSet<String>,
+    pub characters: Vec<Character>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Database {
     pub groups: Vec<Group>,
-    pub characters: Vec<Character>,
+    pub characters: HashSet<Character>,
 }
 
 impl Database {
@@ -93,7 +101,6 @@ impl Database {
 
 pub static DATABASE: OnceLock<RwLock<Database>> = OnceLock::new();
 
-#[tauri::command]
 pub fn get_database() -> &'static RwLock<Database> {
     DATABASE.get_or_init(|| Database::new().into())
 }

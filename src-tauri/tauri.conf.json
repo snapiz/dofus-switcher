@@ -12,8 +12,9 @@
     "windows": [
       {
         "title": "dofus-switcher",
-        "width": 800,
-        "height": 600
+        "width": 600,
+        "height": 600,
+        "dragDropEnabled": false
       }
     ],
     "security": {
