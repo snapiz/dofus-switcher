@@ -1,5 +1,6 @@
 use crate::database::{get_database, Character};
 use std::{
+    collections::HashMap,
     thread::{self, sleep},
     time::Duration,
 };
@@ -25,8 +26,8 @@ pub fn watch() {
                 continue;
             };
 
-            for character in db.characters.iter() {
-                windows.remove(&character.name);
+            for (key, _) in db.characters.iter() {
+                windows.remove(key.as_str());
             }
 
             if windows.is_empty() {
@@ -35,8 +36,8 @@ pub fn watch() {
 
             let characters = windows
                 .iter()
-                .map(|(key, _)| Character::new(key))
-                .collect::<Vec<_>>();
+                .map(|(key, _)| (key.to_owned(), Character::new(key)))
+                .collect::<HashMap<_, _>>();
 
             db.characters.extend(characters);
             db.save();

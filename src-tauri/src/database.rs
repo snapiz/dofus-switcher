@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashSet,
-    hash::Hash,
+    collections::HashMap,
     path::Path,
     sync::{OnceLock, RwLock},
 };
@@ -31,7 +30,7 @@ pub enum Breed {
     Forgelance,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Character {
     pub name: String,
     pub breed: Option<Breed>,
@@ -48,18 +47,6 @@ impl Character {
     }
 }
 
-impl PartialEq for Character {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
-    }
-}
-
-impl Hash for Character {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.name.hash(state);
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Group {
     pub name: String,
@@ -69,7 +56,7 @@ pub struct Group {
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Database {
     pub groups: Vec<Group>,
-    pub characters: HashSet<Character>,
+    pub characters: HashMap<String, Character>,
 }
 
 impl Database {
