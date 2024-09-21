@@ -61,7 +61,6 @@ function App() {
 
                     const groups: Group[] = await invoke("add_character_to_group", { id: i(), name })
                     mutate(groups)
-                    setSelectedGroup(i())
                   }}>Selected</h4>
                   <div>
                     <For each={group.characters}>
@@ -82,12 +81,10 @@ function App() {
                           const middleX = x + width / 2
                           const groups: Group[] = await invoke("add_character_to_group_at", { id: i(), name, targetName: character.name, right: e.clientX > middleX })
                           mutate(groups)
-                          setSelectedGroup(i())
 
                         }} onclick={async () => {
                           const groups: Group[] = await invoke("set_character_enabled", { id: i(), characterId: characterId(), value: !character.enabled })
                           mutate(groups)
-                          setSelectedGroup(i())
                         }}>
                           <img src={`/breeds/${character.breed || 'None'}.png`} />
                         </div>
@@ -104,10 +101,12 @@ function App() {
 
                     const groups: Group[] = await invoke("remove_character_from_group", { id: i(), characterId: parseInt(characterId, 10) })
                     mutate(groups)
-                    setSelectedGroup(i())
                   }}>
                     Available
-                    <button style="margin-left: 5px" onclick={() => refetch()}>Refresh</button>
+                    <button style="margin-left: 5px" onclick={() => {
+                      setSelectedGroup(i())
+                      refetch()
+                    }}>Refresh</button>
                   </h4>
                   <div>
                     <For each={available_characters()?.filter((ac) => !group.characters.some((c) => c.name === ac.name))}>
