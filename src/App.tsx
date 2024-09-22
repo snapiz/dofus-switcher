@@ -121,6 +121,7 @@ function App() {
                             <img src={`/breeds/${character.breed || 'None'}.png`} />
                           </div>
                           <dialog open={open()}>
+                            <h4>{character.name}</h4>
                             <For each={breeds}>
                               {(breed) =>
                                 <div class="avatar" onclick={async () => {
@@ -135,8 +136,7 @@ function App() {
                             </For>
                           </dialog>
                         </>
-                      }
-                      }
+                      }}
                     </For>
                   </div>
                 </div>
