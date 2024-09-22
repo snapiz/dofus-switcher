@@ -1,0 +1,39 @@
+.content {
+  display: none;
+  max-height: 0;
+}
+
+:checked+.content {
+  display: block;
+  max-height: unset;
+}
+
+input[name=group] {
+  display: none;
+}
+
+label {
+  cursor: pointer;
+}
+
+.avatar {
+  cursor: pointer;
+  display: inline-block;
+  padding: 5px;
+  border-radius: 5px;
+  border: transparent solid 3px;
+}
+
+.avatar>img {
+  height: 54px;
+}
+
+.avatar.disabled {
+  border: red solid 3px;
+}
+
+.group-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}

@@ -1,163 +1,187 @@
-use std::sync::{OnceLock, RwLock};
-
 use crate::{
-    settings::{get_settings, Breed, Character, Group, Settings},
-    window::get_visible_windows,
+    database::{get_database, Breed, Character, Group},
+    desktop::Desktop,
 };
 
-static WINDOWS: OnceLock<RwLock<Vec<(String, u32)>>> = OnceLock::new();
+#[tauri::command]
+pub fn get_available_characters() -> Vec<Character> {
+    let Ok(db) = get_database().read() else {
+        return vec![];
+    };
 
-pub fn get_windows() -> &'static RwLock<Vec<(String, u32)>> {
-    WINDOWS.get_or_init(|| {
-        let settings = get_settings().read().unwrap().clone();
-        get_windows_from_settings(&settings).into()
-    })
-}
+    let Ok(desktop) = Desktop::connect() else {
+        return vec![];
+    };
 
-fn get_windows_from_settings(settings: &Settings) -> Vec<(String, u32)> {
-    let visible_windows = get_visible_windows().expect("failed to get visible windows");
-    let mut windows = Vec::new();
+    let Ok(wins) = desktop.get_windows() else {
+        return vec![];
+    };
 
-    if settings.groups.is_empty() {
-        return windows;
-    }
-
-    for character in settings.groups[settings.current_group].characters.iter() {
-        if let Some(w) = visible_windows.get(&character.name) {
-            windows.push((character.name.to_owned(), w.to_owned()));
-        }
-    }
-
-    windows
-}
-
-pub fn update_windows(settings: &Settings) {
-    let mut windows = get_windows().write().unwrap();
-
-    *windows = get_windows_from_settings(settings);
+    wins.iter()
+        .map(|(name, _)| {
+            db.characters
+                .get(name)
+                .cloned()
+                .unwrap_or_else(|| Character::new(name))
+        })
+        .collect::<Vec<_>>()
 }
 
 #[tauri::command]
-pub fn create_group(name: &str) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
+pub fn get_groups() -> Vec<Group> {
+    let Ok(db) = get_database().read() else {
+        return vec![];
+    };
 
-        let Ok(windows) = get_visible_windows() else {
-            return settings.clone();
-        };
+    db.groups.clone()
+}
 
-        let characters = windows
-            .into_iter()
-            .map(|(name, _)| Character {
-                name,
-                breed: Breed::Iop,
-            })
-            .collect::<Vec<_>>();
+#[tauri::command]
+pub fn create_group(name: String) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
 
-        settings.groups.push(Group {
-            name: name.to_owned(),
-            characters,
+    db.groups.splice(
+        0..0,
+        vec![Group {
+            name,
+            characters: Default::default(),
+        }],
+    );
+
+    db.save();
+    db.groups.clone()
+}
+
+#[tauri::command]
+pub fn delete_group(id: usize) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
+
+    db.groups.remove(id);
+
+    db.save();
+    db.groups.clone()
+}
+
+#[tauri::command]
+pub fn add_character_to_group(id: usize, name: String) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
+
+    if db.groups.get(id).is_none() {
+        return db.groups.clone();
+    };
+
+    if db.groups[id].characters.iter().any(|c| c.name == name) {
+        return db.groups.clone();
+    }
+
+    let character = db
+        .characters
+        .get(&name)
+        .cloned()
+        .unwrap_or_else(|| Character::new(name));
+
+    db.groups[id].characters.push(character);
+
+    db.save();
+    db.groups.clone()
+}
+
+#[tauri::command]
+pub fn add_character_to_group_at(
+    id: usize,
+    name: String,
+    target_name: String,
+    right: bool,
+) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
+
+    if db.groups.get(id).is_none() {
+        return db.groups.clone();
+    };
+
+    db.groups[id].characters.retain(|c| c.name != name);
+
+    let character = db
+        .characters
+        .get(&name)
+        .cloned()
+        .unwrap_or_else(|| Character::new(name));
+
+    db.groups[id]
+        .characters
+        .iter()
+        .position(|c| c.name == target_name)
+        .map(|index| {
+            if right {
+                db.groups[id].characters.insert(index + 1, character);
+            } else {
+                db.groups[id]
+                    .characters
+                    .splice(index..index, vec![character]);
+            }
         });
 
-        settings.current_group = settings.groups.len() - 1;
-        settings.save();
-        settings.clone()
-    };
-
-    update_windows(&settings);
-
-    settings
+    db.save();
+    db.groups.clone()
 }
 
 #[tauri::command]
-pub fn set_current_group(id: usize) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
-
-        settings.current_group = id;
-        settings.save();
-        settings.clone()
+pub fn remove_character_from_group(id: usize, character_id: usize) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
+    if db.groups.get(id).is_none() {
+        return db.groups.clone();
     };
 
-    update_windows(&settings);
-    settings
+    db.groups[id].characters.remove(character_id);
+    db.save();
+    db.groups.clone()
 }
 
 #[tauri::command]
-pub fn delete_group(id: usize) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
+pub fn set_character_enabled(id: usize, character_id: usize, value: bool) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
 
-        settings.groups.remove(id);
+    if db.groups.get(id).is_none() {
+        return db.groups.clone();
+    };
 
-        if settings.current_group > id {
-            settings.current_group = settings.current_group - 1
+    if db.groups[id].characters.get(character_id).is_none() {
+        return db.groups.clone();
+    };
+
+    db.groups[id].characters[character_id].enabled = value;
+    db.save();
+    db.groups.clone()
+}
+
+#[tauri::command]
+pub fn set_character_breed(name: String, breed: Breed) -> Vec<Group> {
+    let Ok(mut db) = get_database().write() else {
+        return vec![];
+    };
+
+    if let Some(character) = db.characters.get_mut(&name) {
+        character.breed = Some(breed.clone());
+    }
+
+    for group in db.groups.iter_mut() {
+        if let Some(character) = group.characters.iter_mut().find(|c| c.name == name) {
+            character.breed = Some(breed.clone());
         }
+    }
 
-        settings.clone()
-    };
-
-    settings.save();
-
-    update_windows(&settings);
-
-    settings
-}
-
-#[tauri::command]
-pub fn refresh_group(id: usize) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
-
-        let Ok(windows) = get_visible_windows() else {
-            return settings.clone();
-        };
-
-        let characters = windows
-            .into_iter()
-            .map(|(name, _)| Character {
-                name,
-                breed: Breed::Iop,
-            })
-            .collect::<Vec<_>>();
-
-        settings.groups[id].characters = characters;
-        settings.current_group = id;
-        settings.save();
-        settings.clone()
-    };
-
-    update_windows(&settings);
-
-    settings
-}
-
-#[tauri::command]
-pub fn delete_group_character(group: usize, character: usize) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
-
-        settings.groups[group].characters.remove(character);
-        settings.save();
-        settings.clone()
-    };
-
-    update_windows(&settings);
-
-    settings
-}
-
-#[tauri::command]
-pub fn swap_group_character(group: usize, a: usize, b: usize) -> Settings {
-    let settings = {
-        let mut settings = get_settings().write().unwrap();
-
-        settings.groups[group].characters.swap(a, b);
-        settings.save();
-        settings.clone()
-    };
-
-    update_windows(&settings);
-
-    settings
+    db.save();
+    db.groups.clone()
 }
