@@ -11,14 +11,30 @@
   "app": {
     "windows": [
       {
-        "title": "dofus-switcher",
+        "title": "Dofus switcher",
         "width": 600,
         "height": 600,
-        "dragDropEnabled": false
+        "dragDropEnabled": false,
+        "closable": false
+      },
+      {
+        "label": "sidebar",
+        "title": " ",
+        "width": 80,
+        "height": 60,
+        "dragDropEnabled": false,
+        "closable": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "scope": {
+          "window": {
+            "all": true
+          }
+        }
+      }
     },
     "trayIcon": {
       "iconPath": "icons/icon.png",
