@@ -1,5 +1,6 @@
-import { createResource, createSignal, For, Suspense } from "solid-js";
+import { createEffect, createResource, createSignal, For, onCleanup, Suspense } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import "./App.css";
 
 interface Character {
@@ -15,7 +16,13 @@ interface Group {
 
 const breeds = ["Ecaflip", "Eniripsa", "Iop", "Cra", "Feca", "Sacrieur", "Sadida", "Osamodas", "Enutrof", "Sram", "Xelor", "Pandawa", "Roublard", "Zobal", "Steamer", "Eliotrope", "Huppermage", "Ouginak", "Forgelance"]
 
+const isSidebarWindow = getCurrentWindow().label === "sidebar"
+
 function App() {
+  return !isSidebarWindow ? (<MainApp></MainApp>) : (<SidebarApp></SidebarApp>)
+}
+
+function MainApp() {
   const [groups, { mutate }] = createResource<Group[]>(async () => (await invoke("get_groups")));
   const [available_characters, { refetch }] = createResource<Character[]>(async () => (await invoke("get_available_characters")));
   const [selectedGroup, setSelectedGroup] = createSignal(0)
@@ -144,6 +151,56 @@ function App() {
             </div>
           </div>
         }
+        </For>
+      </Suspense>
+    </>
+  );
+}
+
+function SidebarApp() {
+  const [characters, { mutate }] = createResource<[Number, Character[]]>(async () => (await invoke("get_active_characters")));
+
+  const updater = setInterval(async () => {
+    const resp: [Number, Character[]] | undefined = await invoke("get_active_characters");
+    for (const [i, c] of (resp?.[1].entries() || [])) {
+      const e = characters()?.[1][i]
+      if (c.name !== e?.name || c.breed !== e.breed) {
+        mutate(resp)
+        break
+      }
+    }
+  }, 1000)
+
+  createEffect(() => {
+    const count = characters()?.[1].length || 1
+
+    getCurrentWindow().setSize(new LogicalSize(80, 80 * count))
+  })
+
+  onCleanup(() => clearInterval(updater))
+
+  return (
+    <>
+      <Suspense>
+        <For each={characters()?.[1]}>
+          {(character, characterId) =>
+            <div title={character.name} classList={{ avatar: true, disabled: !character.enabled }} onclick={async () => {
+              await invoke("set_character_enabled", { id: characters()?.[0], characterId: characterId(), value: !character.enabled })
+              mutate(v => {
+
+                if (!v) {
+                  return v
+                }
+
+                let td = [...v[1]]
+                td[characterId()] = { ...v[1][characterId()], enabled: !character.enabled }
+
+                return [v[0], td]
+              })
+            }}>
+              <img src={`/breeds/${character.breed || 'None'}.png`} />
+            </div>
+          }
         </For>
       </Suspense>
     </>

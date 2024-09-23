@@ -1,6 +1,8 @@
+use std::usize;
+
 use crate::{
     database::{get_database, Breed, Character, Group},
-    desktop::Desktop,
+    desktop::{get_group_windows, Desktop},
 };
 
 #[tauri::command]
@@ -28,6 +30,32 @@ pub fn get_available_characters() -> Vec<Character> {
 }
 
 #[tauri::command]
+pub fn get_active_characters() -> Option<(usize, Vec<Character>)> {
+    let Ok(db) = get_database().read() else {
+        return None;
+    };
+
+    let Ok(group_window) = get_group_windows().read() else {
+        return None;
+    };
+
+    let Some((name, characters)) = group_window.to_owned() else {
+        return None;
+    };
+
+    let Some(id) = db.groups.iter().position(|g| g.name == name) else {
+        return None;
+    };
+
+    let characters = characters
+        .iter()
+        .map(|(_, c)| c.clone())
+        .collect::<Vec<_>>();
+
+    return Some((id, characters));
+}
+
+#[tauri::command]
 pub fn get_groups() -> Vec<Group> {
     let Ok(db) = get_database().read() else {
         return vec![];
@@ -41,6 +69,10 @@ pub fn create_group(name: String) -> Vec<Group> {
     let Ok(mut db) = get_database().write() else {
         return vec![];
     };
+
+    if db.groups.iter().any(|g| g.name == name) {
+        return db.groups.clone();
+    }
 
     db.groups.splice(
         0..0,

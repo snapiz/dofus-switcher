@@ -10,7 +10,7 @@ use enigo::{Enigo, Keyboard, Mouse};
 use lazy_regex::regex_captures;
 use rdev::{listen, EventType};
 
-use crate::desktop::{get_character_windows, Desktop};
+use crate::desktop::{get_group_windows, Desktop};
 
 static BACKSLASH_PRESSED: OnceLock<RwLock<bool>> = OnceLock::new();
 
@@ -29,11 +29,11 @@ pub fn watch() {
                 return;
             };
 
-            let Ok(wins) = get_character_windows().read() else {
+            let Ok(wins) = get_group_windows().read() else {
                 return;
             };
 
-            let Some(wins) = wins.to_owned() else {
+            let Some((_, wins)) = wins.to_owned() else {
                 return;
             };
 
@@ -138,14 +138,19 @@ pub fn watch() {
                         return;
                     };
 
-                    let Some((_, x, y)) = regex_captures!(r#"(-?\d+),(-?\d+)"#, &selection) else {
+                    if selection.starts_with("/travel ") {
+                        let _ = enigo.text(&selection);
+                    } else if let Some((_, x, y)) =
+                        regex_captures!(r#"(-?\d+),(-?\d+)"#, &selection)
+                    {
+                        let _ = enigo.text(&format!("/travel {x},{y}"));
+                    } else {
                         return;
                     };
 
-                    let _ = enigo.text(&format!("/travel {x},{y}"));
                     let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click);
 
-                    sleep(Duration::from_millis(500));
+                    sleep(Duration::from_millis(250));
 
                     let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click);
                 }

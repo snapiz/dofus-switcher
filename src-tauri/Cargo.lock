@@ -766,7 +766,7 @@ dependencies = [
 
 [[package]]
 name = "dofus-switcher"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "arboard",
@@ -779,6 +779,7 @@ dependencies = [
  "shellexpand",
  "tauri",
  "tauri-build",
+ "tauri-plugin-positioner",
  "tauri-plugin-shell",
  "toml 0.8.19",
  "x11rb",
@@ -3520,6 +3521,21 @@ dependencies = [
  "tauri-utils",
  "toml 0.8.19",
  "walkdir",
+]
+
+[[package]]
+name = "tauri-plugin-positioner"
+version = "2.0.0-rc.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e50975fb5ed92c5f80c6cca758bcaf7f2139cd96df7c039067f9c2cd6f4121a"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "tauri",
+ "tauri-plugin",
+ "thiserror",
 ]
 
 [[package]]
