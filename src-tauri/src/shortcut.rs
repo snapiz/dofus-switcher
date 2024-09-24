@@ -123,31 +123,44 @@ pub fn watch() {
 
                 let skip = if pressed.to_owned() { 1 } else { 0 };
 
-                for (id, _) in wins.iter().skip(skip) {
-                    let _ = select_window(&desktop, &mut enigo, id.to_owned());
-                    let _ = enigo.key(enigo::Key::Space, enigo::Direction::Click);
-                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Press);
-                    let _ = enigo.key(enigo::Key::Unicode('a'), enigo::Direction::Click);
-                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Release);
+                let Ok(mut clipboard) = Clipboard::new() else {
+                    return;
+                };
 
-                    let Ok(mut clipboard) = Clipboard::new() else {
-                        return;
-                    };
+                let Ok(selection) = clipboard.get_text() else {
+                    return;
+                };
 
-                    let Ok(selection) = clipboard.get_text() else {
-                        return;
-                    };
-
+                if !selection.starts_with("/travel ") {
                     let Some((_, x, y)) = regex_captures!(r#"(-?\d+),(-?\d+)"#, &selection) else {
                         return;
                     };
+                    if clipboard.set_text(&format!("/travel {x},{y}")).is_err() {
+                        return;
+                    };
+                };
 
-                    let _ = enigo.text(&format!("/travel {x},{y}"));
+                for (id, _) in wins.iter().skip(skip) {
+                    let _ = select_window(&desktop, &mut enigo, id.to_owned());
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Space, enigo::Direction::Click);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Press);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Unicode('a'), enigo::Direction::Click);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Unicode('v'), enigo::Direction::Click);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Release);
+
+                    sleep(Duration::from_millis(40));
                     let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click);
 
-                    sleep(Duration::from_millis(500));
+                    sleep(Duration::from_millis(200));
 
                     let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click);
+
+                    sleep(Duration::from_millis(100));
                 }
 
                 if let Some((id, _)) = wins.first() {
@@ -162,16 +175,26 @@ pub fn watch() {
                 } else {
                     return;
                 }
+                let Ok(mut clipboard) = Clipboard::new() else {
+                    return;
+                };
 
+                sleep(Duration::from_millis(40));
                 let _ = enigo.key(enigo::Key::Space, enigo::Direction::Click);
-                let _ = enigo.key(enigo::Key::Control, enigo::Direction::Press);
-                let _ = enigo.key(enigo::Key::Unicode('a'), enigo::Direction::Click);
-                let _ = enigo.key(enigo::Key::Control, enigo::Direction::Release);
 
                 for (_, character) in wins.iter().skip(1) {
-                    let _ = enigo.text(&format!("/invite {}", character.name));
+                    let _ = clipboard.set_text(&format!("/invite {}", character.name));
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Press);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Unicode('a'), enigo::Direction::Click);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Unicode('v'), enigo::Direction::Click);
+                    sleep(Duration::from_millis(40));
+                    let _ = enigo.key(enigo::Key::Control, enigo::Direction::Release);
+                    sleep(Duration::from_millis(40));
                     let _ = enigo.key(enigo::Key::Return, enigo::Direction::Click);
-                    sleep(Duration::from_millis(150));
+                    sleep(Duration::from_millis(100));
                 }
             }
 
