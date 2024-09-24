@@ -1,6 +1,6 @@
 {
   "productName": "dofus-switcher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.dofus-switcher.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
